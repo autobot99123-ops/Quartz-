@@ -9,10 +9,24 @@ const SELF_ORIGIN = self.location.origin;
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE))
-      .then(() => self.skipWaiting()),
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+      // Tolerant precache: cache each entry individually so a single stale
+      // URL (e.g. a chunk hash that drifted on the host) can't fail the
+      // whole install and disable offline.
+      await Promise.all(
+        PRECACHE.map(async (url) => {
+          try {
+            const res = await fetch(url);
+            if (res.ok) await cache.put(url, res.clone());
+            else console.warn("precache skip (not ok)", url, res.status);
+          } catch (e) {
+            console.warn("precache skip", url, String(e));
+          }
+        }),
+      );
+      await self.skipWaiting();
+    })(),
   );
 });
 

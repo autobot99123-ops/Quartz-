@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-/* Post-build step: generate out/sw.js from scripts/sw.js.template with a
+/* Post-build step: generate out/sw.js (and the committed public/sw.js used by
+ * static hosts that serve public/ verbatim) from scripts/sw.js.template with a
  * manifest of every static asset in out/ (forward-slash URLs).
  *
  * Cache version = content hash of every precached payload, so ANY publish
@@ -67,4 +68,8 @@ const sw = template
 
 const output = path.join(OUT, "sw.js");
 fs.writeFileSync(output, sw);
+const publicSw = path.resolve(__dirname, "..", "public", "sw.js");
+if (path.resolve(OUT) !== path.dirname(publicSw) && !process.env.OUT_DIR) {
+  fs.writeFileSync(publicSw, sw);
+}
 console.log(`sw.js generated: ${manifest.length} precache entries (version ${version}, out: ${OUT})`);
