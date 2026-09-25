@@ -49,6 +49,9 @@ npm start        # serve the static out/ locally
 
 `npm run build` regenerates `public/catalog/` from the seed definitions, exports the static site
 to `out/`, then emits `out/sw.js` whose cache name is derived from the hashed precache content.
+`vercel.json` sets `buildCommand: "npm run build"` so Vercel runs the full pipeline (a plain
+`next build` would not emit `sw.js`, breaking the PWA offline) and 308-redirects legacy
+`page.html` URLs to their clean-route equivalents (`/editor`, `/problems`, …).
 
 ## Catalog & publishing (admin flow)
 

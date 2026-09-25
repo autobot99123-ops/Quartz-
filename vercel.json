@@ -1,0 +1,10 @@
+{
+  "buildCommand": "npm run build",
+  "redirects": [
+    { "source": "/editor.html", "destination": "/editor", "permanent": true },
+    { "source": "/problems.html", "destination": "/problems", "permanent": true },
+    { "source": "/admin.html", "destination": "/admin", "permanent": true },
+    { "source": "/profile.html", "destination": "/profile", "permanent": true },
+    { "source": "/index.html", "destination": "/", "permanent": true }
+  ]
+}

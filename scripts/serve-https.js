@@ -43,7 +43,17 @@ https
       }
 
       if (!fs.existsSync(file) || fs.statSync(file).isDirectory()) {
-        file = path.join(ROOT, "index.html");
+        // Clean-URL parity with Vercel: /editor -> editor.html, /problems -> problems.html
+        if (!path.extname(urlPath)) {
+          const withHtml = path.join(ROOT, urlPath + ".html");
+          if (fs.existsSync(withHtml) && !fs.statSync(withHtml).isDirectory()) {
+            file = withHtml;
+          } else {
+            file = path.join(ROOT, "index.html");
+          }
+        } else {
+          file = path.join(ROOT, "index.html");
+        }
       }
 
       fs.readFile(file, (err, data) => {

@@ -46,8 +46,8 @@ const EXPECTED = [
   let fails = 0;
 
   // Install path first: wait for SW to control the page, so subsequent
-  // /editor.html deep links resolve from cache exactly like an installed app.
-  await page.goto(`${BASE}/problems.html`, { waitUntil: "networkidle" });
+  // /editor deep links resolve from cache exactly like an installed app.
+  await page.goto(`${BASE}/problems`, { waitUntil: "networkidle" });
   await page.waitForFunction(
     async () => {
       const reg = await navigator.serviceWorker.getRegistration();
@@ -65,7 +65,7 @@ const EXPECTED = [
   if (!okLinks) { fails++; console.log("  got:", JSON.stringify(cardLinks, null, 2)); }
 
   for (const [slug, title] of EXPECTED) {
-    await page.goto(`${BASE}/editor.html?problem=${slug}`, { waitUntil: "networkidle" });
+    await page.goto(`${BASE}/editor?problem=${slug}`, { waitUntil: "networkidle" });
     // The editor now resolves its problem from the catalog asynchronously —
     // wait for the rendered header rather than sampling before hydration.
     await page
@@ -80,7 +80,7 @@ const EXPECTED = [
       .catch(() => {});
     const h1 = await page.$eval("h1", (el) => el.textContent || "");
     const match = h1.trim() === title;
-    console.log(`/editor.html?problem=${slug} -> h1=${h1.trim()}`, match ? "OK" : "MISMATCH");
+    console.log(`/editor?problem=${slug} -> h1=${h1.trim()}`, match ? "OK" : "MISMATCH");
     if (!match) fails++;
   }
 

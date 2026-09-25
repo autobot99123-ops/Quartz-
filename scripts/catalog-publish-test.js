@@ -71,7 +71,7 @@ function rewriteProblemTitle(dir, id, title) {
   page.on("pageerror", (e) => consoleErrs.push(e.message));
 
   const waitSWReady = async () => {
-    await page.goto(BASE + "/editor.html", { waitUntil: "networkidle", timeout: 60000 });
+    await page.goto(BASE + "/editor", { waitUntil: "networkidle", timeout: 60000 });
     await page.waitForFunction(
       async () => {
         const reg = await navigator.serviceWorker.getRegistration();

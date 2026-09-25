@@ -50,7 +50,7 @@ const CORRECT = `def solution(nums):
   let navOk = false;
   for (let i = 0; i < 8 && !navOk; i++) {
     try {
-      await page.goto(BASE + '/editor.html', { waitUntil: 'networkidle', timeout: 60000 });
+      await page.goto(BASE + '/editor', { waitUntil: 'networkidle', timeout: 60000 });
       navOk = true;
     } catch (e) {
       console.log(`nav attempt ${i + 1} failed:`, e.message.split('\n')[0]);

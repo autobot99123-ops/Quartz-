@@ -16,7 +16,7 @@ const diffColors = {
 
 export function ProblemCard({ id, title, difficulty, pattern }: ProblemCardProps) {
   return (
-    <Link href={`/editor.html?problem=${id}`}>
+    <Link href={`/editor?problem=${id}`}>
       <div className="group bg-white/[0.03] border border-white/5 rounded-xl p-5 hover:border-orange-500/30 hover:bg-white/[0.06] transition-all duration-300 cursor-pointer flex flex-col h-full">
         <div className="flex items-start justify-between mb-3">
           <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${diffColors[difficulty]}`}>

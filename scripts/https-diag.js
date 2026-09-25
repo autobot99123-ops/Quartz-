@@ -70,7 +70,7 @@ function waitForUrl(timeoutMs) {
     let ok = false;
     for (let i = 0; i < 6 && !ok; i++) {
       try {
-        await page.goto(url + "/editor.html", { waitUntil: "networkidle", timeout: 60000 });
+        await page.goto(url + "/editor", { waitUntil: "networkidle", timeout: 60000 });
         ok = true;
       } catch (e) {
         console.log("nav attempt", i + 1, "failed:", e.message.includes("NAME_NOT_RESOLVED") ? "dns" : e.message);

@@ -21,7 +21,9 @@ physical-phone install/offline checklist to gate Step 4.
   `[path, path.html?, "/index.html", "/"]`, stale Serwist `public/sw.js` deleted,
   prod worker-count handles via `...scope.__quartzJudge`.
 - Playwright gotchas: `insertText` for Python indent, direct `.click()` on Submit,
-  target `/editor.html`, fresh context (cold-cache first submit IS the offline Pyodide load).
+  target `/editor` (clean route; Vercel 404s flat `*.html`, `vercel.json` redirects legacy
+  `.html` URLs and sets `buildCommand: "npm run build"` so `sw.js` is emitted),
+  fresh context (cold-cache first submit IS the offline Pyodide load).
 - **Process reaping**: `Start-Process` children die between bash calls on this box →
   sealed single-node runners spawn server+tunnel+test in one process.
 - **HTTPS validation (this session)**: mkcert (1.4.4, scoop extras) CA installed to
