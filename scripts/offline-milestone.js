@@ -113,11 +113,11 @@ const CORRECT = `def solution(nums):
   const clicked = await page.evaluate(() => document.body.innerText.includes('Running'));
   console.log('After direct click, showing Running state?', clicked);
   try {
-    await page.waitForSelector('text=4/4', { timeout: 90000 });
+    await page.waitForSelector('text=100%', { timeout: 90000 });
   } catch (e) {
     await page.waitForTimeout(1500);
     const dbg = await page.evaluate(() => document.body.innerText.slice(-1500));
-    console.log('SUBMIT DID NOT REACH 4/4. Tail fragment:', JSON.stringify(dbg));
+    console.log('SUBMIT DID NOT REACH 100%. Tail fragment:', JSON.stringify(dbg));
     console.log('Console/page errors so far:', consoleMsgs.length ? consoleMsgs.join(' | ') : 'none');
     throw e;
   }
@@ -136,6 +136,15 @@ const CORRECT = `def solution(nums):
   // 5) Reload (offline) -> navigateFallback shell must serve from cache.
   await page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
   await page.waitForFunction(() => !!navigator.serviceWorker.controller && document.readyState === 'complete', { timeout: 15000 }).catch(() => {});
+  // The editor resolves its problem from the (cached) catalog asynchronously —
+  // wait for the header to render before sampling the shell.
+  await page.waitForFunction(
+    () => {
+      const h1 = document.querySelector('h1');
+      return !!h1 && h1.textContent.trim().length > 0;
+    },
+    { timeout: 15000 },
+  ).catch(() => {});
   const shellText = await page.evaluate(() => document.body.innerText.slice(0, 200));
   console.log('OFFLINE RELOAD: first 120 chars =', JSON.stringify(shellText.slice(0, 120)));
   console.log('CDN hits during session:', cdnHits.length);

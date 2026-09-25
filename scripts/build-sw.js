@@ -1,14 +1,26 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 /* Post-build step: generate out/sw.js from scripts/sw.js.template with a
- * manifest of every static asset in out/, using forward-slash URLs (Serwist
- * emits Windows backslash URLs, which break CacheStorage matching offline).
+ * manifest of every static asset in out/ (forward-slash URLs).
+ *
+ * Cache version = content hash of every precached payload, so ANY publish
+ * (catalog index change, live flag flip, new/edited problem file, code change)
+ * yields a different cache name and installed devices pick it up on next
+ * reconnect. Identical content ⇒ identical version (no pointless churn).
+ *
+ * live-only catalog precache: /catalog/index.json plus the problem files of
+ * live entries are precached; not-live problems are cached on first fetch.
+ *
+ * OUT_DIR env override points at a sandbox copy (used by
+ * scripts/catalog-publish-test.js so real out/ is never mutated).
  */
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 
-const OUT = path.resolve(__dirname, "..", "out");
+const OUT = process.env.OUT_DIR
+  ? path.resolve(process.env.OUT_DIR)
+  : path.resolve(__dirname, "..", "out");
 const TEMPLATE = path.join(__dirname, "sw.js.template");
-const VERSION = new Date().toISOString().slice(0, 10).replace(/-/g, "");
 
 function walk(dir) {
   const out = [];
@@ -23,20 +35,36 @@ function walk(dir) {
   return out;
 }
 
+let liveProblemIds = new Set();
+try {
+  const index = JSON.parse(fs.readFileSync(path.join(OUT, "catalog", "index.json"), "utf8"));
+  liveProblemIds = new Set(index.filter((e) => e.live === true).map((e) => e.id));
+} catch {
+  console.warn("catalog/index.json not found in out/ — precaching every catalog file.");
+}
+
 const files = walk(OUT);
 const manifest = [];
+const hasher = crypto.createHash("sha1");
 for (const file of files) {
   const rel = path.relative(OUT, file).split(path.sep).join("/");
   if (rel === "sw.js" || rel.endsWith(".map")) continue;
-  manifest.push("/" + rel);
+  const url = "/" + rel;
+  const m = url.match(/^\/catalog\/problems\/(.+)\.json$/);
+  if (m && !liveProblemIds.has(m[1])) continue; // not-live: runtime cache only
+  manifest.push(url);
+  hasher.update(fs.readFileSync(file));
 }
 manifest.sort();
 manifest.unshift("/");
+hasher.update("|");
 
+const version = "qz-" + hasher.digest("hex").slice(0, 10);
 const template = fs.readFileSync(TEMPLATE, "utf8");
 const sw = template
-  .replace("__CACHE_NAME__", JSON.stringify("qz-" + VERSION))
+  .replace("__CACHE_NAME__", JSON.stringify(version))
   .replace("__PRECACHE_MANIFEST__", JSON.stringify(manifest));
 
-fs.writeFileSync(path.join(OUT, "sw.js"), sw);
-console.log(`sw.js generated: ${manifest.length} precache entries (version ${VERSION})`);
+const output = path.join(OUT, "sw.js");
+fs.writeFileSync(output, sw);
+console.log(`sw.js generated: ${manifest.length} precache entries (version ${version}, out: ${OUT})`);

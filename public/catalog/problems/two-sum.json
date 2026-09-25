@@ -1,0 +1,73 @@
+{
+  "id": "two-sum",
+  "title": "Two Sum",
+  "pattern": "Hash Map",
+  "difficulty": "easy",
+  "statement_md": "Given an array of integers nums and an integer target, return the indices of the two numbers such that they add up to target. You may assume that each input has exactly one solution, and you may not use the same element twice.\n\n### Input and Output\nYour code is a function `solution`. Return the value exactly as expected; the judge compares with strict equality.\n\n### Examples\n**Example 1:**\n```\nTwo Sum(2, 7, 11, 15) -> 9\n```\n\n**Example 2:**\n```\nTwo Sum(3, 2, 4) -> 6\n```",
+  "concept_md": "Trade time for space: hash each visited value against its index as you iterate, so the complement lookup is O(1). Recognise it whenever an O(n²) pair search can be answered by map lookups.",
+  "mode": "function",
+  "compare": "exact",
+  "starter": {
+    "javascript": "// Two Sum — return indices of the two numbers that add up to target.\nfunction solution(nums, target) {\n  // Your code here\n  return [];\n}\n",
+    "python": ""
+  },
+  "reference": {
+    "javascript": "function solution(nums, target) {\n  const seen = new Map();\n  for (let i = 0; i < nums.length; i++) {\n    const need = target - nums[i];\n    if (seen.has(need)) return [seen.get(need), i];\n    seen.set(nums[i], i);\n  }\n  return [];\n}\n",
+    "python": ""
+  },
+  "tests": [
+    {
+      "in": [
+        2,
+        7,
+        11,
+        15
+      ],
+      "out": 9,
+      "hidden": false
+    },
+    {
+      "in": [
+        3,
+        2,
+        4
+      ],
+      "out": 6,
+      "hidden": false
+    },
+    {
+      "in": [
+        3,
+        3
+      ],
+      "out": 6,
+      "hidden": false
+    },
+    {
+      "in": [
+        -1,
+        -2,
+        -3,
+        -4,
+        -5
+      ],
+      "out": -8,
+      "hidden": false
+    },
+    {
+      "in": [
+        0,
+        4,
+        3,
+        0
+      ],
+      "out": 0,
+      "hidden": false
+    }
+  ],
+  "hints": [
+    "You don't need to compare every pair — the value you're searching for is target minus the current number.",
+    "Store each value → index in a hash map as you iterate; look up the complement in O(1) instead of scanning the array.",
+    "seen = {}; for i,n in nums: need = target - n; if need in seen return [seen[need], i]; seen[n] = i"
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "id": "longest-increasing-subsequence",
+  "title": "Longest Increasing Subsequence",
+  "pattern": "Dynamic Programming",
+  "difficulty": "medium",
+  "statement_md": "Given an integer array nums, return the length of the longest strictly increasing subsequence.\n\n### Input and Output\nYour code is a function `solution`. Return the value exactly as expected; the judge compares with strict equality.\n\n### Examples\n**Example 1:**\n```\nLongest Increasing Subsequence(10, 9, 2, 5, 3, 7, 101, 18) -> 4\n```\n\n**Example 2:**\n```\nLongest Increasing Subsequence(0, 1, 0, 3, 2, 3) -> 4\n```",
+  "concept_md": "dp[i] = length of the best increasing sequence ending at i, reused by later indexes — classic O(n²) DP. Recognise it when a longest/main/best result depends on an ordering and earlier choices constrain later ones.",
+  "mode": "function",
+  "compare": "exact",
+  "starter": {
+    "javascript": "// Longest Increasing Subsequence — return the length of the longest strictly\n// increasing subsequence in nums.\nfunction solution(nums) {\n  // Your code here\n  return 0;\n}\n",
+    "python": ""
+  },
+  "reference": {
+    "javascript": "function solution(nums) {\n  const dp = new Array(nums.length).fill(1);\n  let best = nums.length ? 1 : 0;\n  for (let i = 1; i < nums.length; i++) {\n    for (let j = 0; j < i; j++) {\n      if (nums[j] < nums[i]) dp[i] = Math.max(dp[i], dp[j] + 1);\n    }\n    best = Math.max(best, dp[i]);\n  }\n  return best;\n}\n",
+    "python": ""
+  },
+  "tests": [
+    {
+      "in": [
+        10,
+        9,
+        2,
+        5,
+        3,
+        7,
+        101,
+        18
+      ],
+      "out": 4,
+      "hidden": false
+    },
+    {
+      "in": [
+        0,
+        1,
+        0,
+        3,
+        2,
+        3
+      ],
+      "out": 4,
+      "hidden": false
+    },
+    {
+      "in": [
+        7,
+        7,
+        7,
+        7,
+        7,
+        7,
+        7
+      ],
+      "out": 1,
+      "hidden": false
+    },
+    {
+      "in": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "out": 5,
+      "hidden": false
+    },
+    {
+      "in": [
+        5,
+        4,
+        3,
+        2,
+        1
+      ],
+      "out": 1,
+      "hidden": false
+    }
+  ],
+  "hints": [
+    "An element can only extend sequences that end before it with a smaller value — think about what a single number knows.",
+    "dp[i] is the answer to 'longest sequence ending exactly at i'; build it from every earlier smaller value.",
+    "dp = [1]*n; for i: for j<i: if nums[j]<nums[i]: dp[i]=max(dp[i],dp[j]+1); answer = max(dp)"
+  ]
+}

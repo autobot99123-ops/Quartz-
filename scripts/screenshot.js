@@ -11,7 +11,6 @@ const path = require('path');
     { name: 'problems', url: 'http://localhost:3000/problems' },
     { name: 'editor', url: 'http://localhost:3000/editor' },
     { name: 'admin', url: 'http://localhost:3000/admin' },
-    { name: 'ai-tutor', url: 'http://localhost:3000/ai-tutor' },
   ];
   
   const outDir = path.join(__dirname, '..', 'screenshots', 'after');

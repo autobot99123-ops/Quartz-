@@ -1,0 +1,94 @@
+{
+  "id": "word-ladder",
+  "title": "Word Ladder",
+  "pattern": "BFS",
+  "difficulty": "hard",
+  "statement_md": "Given beginWord, endWord and a dictionary wordList, return the length of the shortest transformation sequence from beginWord to endWord, such that only one letter changes per step and each transformed word must exist in wordList. Return 0 if no such sequence exists.\n\n### Input and Output\nYour code is a function `solution`. Return the value exactly as expected; the judge compares with strict equality.\n\n### Examples\n**Example 1:**\n```\nWord Ladder(\"hit\", \"cog\", [\"hot\",\"dot\",\"dog\",\"lot\",\"log\",\"cog\"]) -> 5\n```\n\n**Example 2:**\n```\nWord Ladder(\"hit\", \"cog\", [\"hot\",\"dot\",\"dog\",\"lot\",\"log\"]) -> 0\n```",
+  "concept_md": "Each word is a node, and an edge connects words differing by one letter — the shortest path is BFS over words. Recognise it for 'shortest transformation/shortest path' where the state space is enumerable.",
+  "mode": "function",
+  "compare": "exact",
+  "starter": {
+    "javascript": "// Word Ladder — shortest transformation from beginWord to endWord, one letter\n// change per step, every intermediate word in wordList. Return 0 if impossible.\nfunction solution(beginWord, endWord, wordList) {\n  // Your code here\n  return 0;\n}\n",
+    "python": ""
+  },
+  "reference": {
+    "javascript": "function solution(beginWord, endWord, wordList) {\n  const words = new Set(wordList);\n  if (!words.has(endWord)) return 0;\n  let queue = [[beginWord, 1]];\n  while (queue.length) {\n    const next = [];\n    for (const [w, d] of queue) {\n      for (let i = 0; i < w.length; i++) {\n        for (let c = 97; c <= 122; c++) {\n          const cand = w.slice(0, i) + String.fromCharCode(c) + w.slice(i + 1);\n          if (cand === endWord) return d + 1;\n          if (words.has(cand)) {\n            words.delete(cand);\n            next.push([cand, d + 1]);\n          }\n        }\n      }\n    }\n    queue = next;\n  }\n  return 0;\n}\n",
+    "python": ""
+  },
+  "tests": [
+    {
+      "in": [
+        "hit",
+        "cog",
+        [
+          "hot",
+          "dot",
+          "dog",
+          "lot",
+          "log",
+          "cog"
+        ]
+      ],
+      "out": 5,
+      "hidden": false
+    },
+    {
+      "in": [
+        "hit",
+        "cog",
+        [
+          "hot",
+          "dot",
+          "dog",
+          "lot",
+          "log"
+        ]
+      ],
+      "out": 0,
+      "hidden": false
+    },
+    {
+      "in": [
+        "hot",
+        "dog",
+        [
+          "hot",
+          "dot",
+          "dog"
+        ]
+      ],
+      "out": 3,
+      "hidden": false
+    },
+    {
+      "in": [
+        "hit",
+        "cog",
+        [
+          "hot",
+          "cog"
+        ]
+      ],
+      "out": 2,
+      "hidden": false
+    },
+    {
+      "in": [
+        "dog",
+        "dot",
+        [
+          "dog",
+          "dot",
+          "dtt"
+        ]
+      ],
+      "out": 2,
+      "hidden": false
+    }
+  ],
+  "hints": [
+    "Two words are 'adjacent' when they differ by one letter — every path is a hop in a word graph.",
+    "Shortest path over unweighted edges means breadth-first; visit each word at most once.",
+    "set = wordList; queue = [(begin, 1)]; for each word try replacing each letter a-z; if reach end return depth+1; revisit-free BFS"
+  ]
+}

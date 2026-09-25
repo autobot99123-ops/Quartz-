@@ -1,0 +1,51 @@
+[
+  {
+    "id": "max-of-list",
+    "title": "Maximum of List",
+    "pattern": "Arrays",
+    "difficulty": "easy",
+    "live": true
+  },
+  {
+    "id": "two-sum",
+    "title": "Two Sum",
+    "pattern": "Hash Map",
+    "difficulty": "easy",
+    "live": true
+  },
+  {
+    "id": "valid-parentheses",
+    "title": "Valid Parentheses",
+    "pattern": "Stacks",
+    "difficulty": "easy",
+    "live": true
+  },
+  {
+    "id": "longest-increasing-subsequence",
+    "title": "Longest Increasing Subsequence",
+    "pattern": "Dynamic Programming",
+    "difficulty": "medium",
+    "live": true
+  },
+  {
+    "id": "merge-intervals",
+    "title": "Merge Intervals",
+    "pattern": "Intervals",
+    "difficulty": "medium",
+    "live": true
+  },
+  {
+    "id": "median-of-two-sorted-arrays",
+    "title": "Median of Two Sorted Arrays",
+    "pattern": "Binary Search",
+    "difficulty": "hard",
+    "live": true
+  },
+  {
+    "id": "word-ladder",
+    "title": "Word Ladder",
+    "pattern": "BFS",
+    "difficulty": "hard",
+    "live": true
+  }
+]

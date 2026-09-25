@@ -1,0 +1,80 @@
+{
+  "id": "max-of-list",
+  "title": "Maximum of List",
+  "pattern": "Arrays",
+  "difficulty": "easy",
+  "statement_md": "Given a list of integers nums, return the largest value in the list. You may assume the list is never empty. Python runs in-browser via self-hosted Pyodide — fully offline once loaded.\n\n### Input and Output\nYour code is a function `solution`. Return the value exactly as expected; the judge compares with strict equality.\n\n### Examples\n**Example 1:**\n```\nMaximum of List([3,1,2]) -> 3\n```\n\n**Example 2:**\n```\nMaximum of List([-5,-1,-9]) -> -1\n```",
+  "concept_md": "A single linear scan tracking the running maximum is optimal — every element must be seen at least once. Recognise it whenever the answer must dominate every input value.",
+  "mode": "function",
+  "compare": "exact",
+  "starter": {
+    "javascript": "",
+    "python": "# Maximum of List — return the largest integer in nums.\ndef solution(nums):\n    # Your code here\n    return 0\n"
+  },
+  "reference": {
+    "javascript": "",
+    "python": "def solution(nums):\n    largest = nums[0]\n    for n in nums:\n        if n > largest:\n            largest = n\n    return largest\n"
+  },
+  "tests": [
+    {
+      "in": [
+        [
+          3,
+          1,
+          2
+        ]
+      ],
+      "out": 3,
+      "hidden": false
+    },
+    {
+      "in": [
+        [
+          -5,
+          -1,
+          -9
+        ]
+      ],
+      "out": -1,
+      "hidden": false
+    },
+    {
+      "in": [
+        [
+          7
+        ]
+      ],
+      "out": 7,
+      "hidden": false
+    },
+    {
+      "in": [
+        [
+          10,
+          20,
+          30,
+          5
+        ]
+      ],
+      "out": 30,
+      "hidden": false
+    },
+    {
+      "in": [
+        [
+          1,
+          1,
+          1,
+          1
+        ]
+      ],
+      "out": 1,
+      "hidden": false
+    }
+  ],
+  "hints": [
+    "The answer is just the biggest number you've seen so far — no comparisons between arbitrary pairs.",
+    "Carry one 'best so far' through a single pass and update it when a larger value appears.",
+    "best = nums[0]; for n in nums: if n > best: best = n; return best"
+  ]
+}

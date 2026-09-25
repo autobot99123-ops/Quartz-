@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "next build --webpack && node scripts/build-sw.js",
+    "build": "node scripts/build-catalog.js && next build --webpack && node scripts/build-sw.js",
     "start": "node scripts/serve-static.js out",
     "preview": "next dev --webpack",
     "lint": "eslint",

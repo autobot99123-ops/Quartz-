@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { Lightbulb } from "lucide-react";
 import type { JudgeTestResult } from "@/lib/judge/types";
 
 type TestCase = JudgeTestResult;
@@ -9,9 +11,21 @@ interface ResultPanelProps {
   memory: number;
   testCases: TestCase[];
   isLoading: boolean;
+  hints?: string[];
 }
 
-export function ResultPanel({ passed, total, time, memory, testCases, isLoading }: ResultPanelProps) {
+const HINT_LEVELS = ["Nudge", "Concept", "Pseudocode"];
+
+export function ResultPanel({
+  passed,
+  total,
+  time,
+  memory,
+  testCases,
+  isLoading,
+  hints,
+}: ResultPanelProps) {
+  const [revealed, setRevealed] = useState(0);
   const percentage = total > 0 ? Math.round((passed / total) * 100) : 0;
 
   if (isLoading) {
@@ -57,7 +71,7 @@ export function ResultPanel({ passed, total, time, memory, testCases, isLoading 
       </div>
 
       {/* Test cases */}
-      <div className="space-y-2 max-h-60 overflow-y-auto">
+      <div className="space-y-2 max-h-60 overflow-y-auto mb-4">
         <h4 className="text-sm font-medium text-gray-400">Test Cases</h4>
         {testCases.map((tc) => (
           <div
@@ -86,6 +100,46 @@ export function ResultPanel({ passed, total, time, memory, testCases, isLoading 
           </div>
         ))}
       </div>
+
+      {/* Hints — one at a time, nudge -> concept -> pseudocode */}
+      {hints && hints.length > 0 && (
+        <div className="border-t border-white/5 pt-4">
+          <h4 className="text-sm font-medium text-gray-400 flex items-center gap-1.5 mb-2">
+            <Lightbulb className="w-4 h-4 text-yellow-400" /> Hints
+          </h4>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {HINT_LEVELS.slice(0, hints.length).map((label, idx) => (
+              <button
+                key={label}
+                disabled={idx >= revealed}
+                onClick={() => setRevealed(idx + 1)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                  idx < revealed
+                    ? "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20"
+                    : "bg-white/5 text-gray-500 border border-white/5 disabled:opacity-40"
+                }`}
+              >
+                {idx < revealed ? "✓ " : ""}{label}
+              </button>
+            ))}
+          </div>
+          {revealed > 0 && (
+            <div className="space-y-2">
+              {hints.slice(0, revealed).map((h, idx) => (
+                <div
+                  key={idx}
+                  className="p-3 rounded-lg bg-yellow-500/5 border border-yellow-500/10 text-xs text-gray-300"
+                >
+                  <span className="text-yellow-400 font-semibold mr-1.5">
+                    {HINT_LEVELS[idx]}:
+                  </span>
+                  {h}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

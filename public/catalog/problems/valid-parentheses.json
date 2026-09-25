@@ -1,0 +1,67 @@
+{
+  "id": "valid-parentheses",
+  "title": "Valid Parentheses",
+  "pattern": "Stacks",
+  "difficulty": "easy",
+  "statement_md": "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid. An input string is valid if every open bracket is closed by the same type of bracket, in the correct order.\n\n### Input and Output\nYour code is a function `solution`. Return the value exactly as expected; the judge compares with strict equality.\n\n### Examples\n**Example 1:**\n```\nValid Parentheses(\"()\") -> true\n```\n\n**Example 2:**\n```\nValid Parentheses(\"()[]{}\") -> true\n```",
+  "concept_md": "The LIFO nature of matched bracket pairs is exactly a stack. Push openers, pop on closers, and verify the top matches. Recognise it whenever nested or mirrored elements must pair up in order.",
+  "mode": "function",
+  "compare": "exact",
+  "starter": {
+    "javascript": "// Valid Parentheses — return true if s has matched (), {}, [] pairs.\nfunction solution(s) {\n  // Your code here\n  return true;\n}\n",
+    "python": ""
+  },
+  "reference": {
+    "javascript": "function solution(s) {\n  const stack = [];\n  const pairs = { ')': '(', '}': '{', ']': '[' };\n  for (const ch of s) {\n    if (ch === '(' || ch === '{' || ch === '[') stack.push(ch);\n    else if (stack.pop() !== pairs[ch]) return false;\n  }\n  return stack.length === 0;\n}\n",
+    "python": ""
+  },
+  "tests": [
+    {
+      "in": [
+        "()"
+      ],
+      "out": true,
+      "hidden": false
+    },
+    {
+      "in": [
+        "()[]{}"
+      ],
+      "out": true,
+      "hidden": false
+    },
+    {
+      "in": [
+        "(]"
+      ],
+      "out": false,
+      "hidden": false
+    },
+    {
+      "in": [
+        "([)]"
+      ],
+      "out": false,
+      "hidden": false
+    },
+    {
+      "in": [
+        "{[]}"
+      ],
+      "out": true,
+      "hidden": false
+    },
+    {
+      "in": [
+        ""
+      ],
+      "out": true,
+      "hidden": false
+    }
+  ],
+  "hints": [
+    "A closing bracket must pair with the most recent unclosed opener — that is a stack, not a queue.",
+    "Push every opener, pop when you read a closer, and the popped symbol must match the closer's expected opener.",
+    "stack = []; for ch in s: if ch in '({[' push; else if pop() != pair[ch] return false; return stack empty"
+  ]
+}

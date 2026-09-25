@@ -1,74 +1,121 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CodeEditor } from "@/components/CodeEditor";
 import { ResultPanel } from "@/components/ResultPanel";
 import { Play, Loader2 } from "lucide-react";
 import { judgeJavascript, judgePython } from "@/lib/judge/engine";
-import {
-  TWO_SUM_PROBLEM,
-  VALID_PARENTHESES_PROBLEM,
-  MERGE_INTERVALS_PROBLEM,
-  LIS_PROBLEM,
-  WORD_LADDER_PROBLEM,
-  MEDIAN_PROBLEM,
-  PYTHON_MAX_PROBLEM,
-} from "@/lib/judge/problems";
-import type { HardcodedProblem } from "@/lib/judge/problems";
 import type { JudgeResult } from "@/lib/judge/types";
+import {
+  DIFFICULTY_LABEL,
+  fetchCatalogIndex,
+  fetchCatalogProblem,
+  inferLanguages,
+  starterFor,
+  toJudgeTestCases,
+  type CatalogEntry,
+  type CatalogLanguage,
+  type CatalogProblem,
+} from "@/lib/catalog";
 
-const PROBLEMS: { problem: HardcodedProblem; language: "javascript" | "python" }[] = [
-  { problem: TWO_SUM_PROBLEM, language: "javascript" },
-  { problem: VALID_PARENTHESES_PROBLEM, language: "javascript" },
-  { problem: MERGE_INTERVALS_PROBLEM, language: "javascript" },
-  { problem: LIS_PROBLEM, language: "javascript" },
-  { problem: WORD_LADDER_PROBLEM, language: "javascript" },
-  { problem: MEDIAN_PROBLEM, language: "javascript" },
-  { problem: PYTHON_MAX_PROBLEM, language: "python" },
-];
+const diffBadge = {
+  easy: "bg-green-500/10 text-green-400",
+  medium: "bg-yellow-500/10 text-yellow-400",
+  hard: "bg-red-500/10 text-red-400",
+} as const;
+
+function tabLabel(id: string, title: string, langs?: CatalogLanguage[]) {
+  if (langs && langs.length === 1 && langs[0] === "python") return "Python";
+  return title;
+}
 
 export default function EditorPage() {
-  const [problemIndex, setProblemIndex] = useState(0);
-  const { problem, language } = PROBLEMS[problemIndex];
-  const [code, setCode] = useState(problem.starterCode);
+  const [entries, setEntries] = useState<CatalogEntry[] | null>(null);
+  const [langs, setLangs] = useState<Record<string, CatalogLanguage[]>>({});
+  const [problem, setProblem] = useState<CatalogProblem | null>(null);
+  const [language, setLanguage] = useState<CatalogLanguage>("javascript");
+  const [code, setCode] = useState("");
   const [isRunning, setIsRunning] = useState(false);
   const [result, setResult] = useState<JudgeResult | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const loadToken = useRef(0);
+
+  async function loadProblem(id: string) {
+    const token = ++loadToken.current;
+    const p = await fetchCatalogProblem(id);
+    if (token !== loadToken.current) return;
+    const available = inferLanguages(p);
+    setProblem(p);
+    setLangs((m) => ({ ...m, [id]: available }));
+    setLanguage(available[0]);
+    setCode(starterFor(p, available[0]));
+    setResult(null);
+    setShowResults(false);
+    setError(null);
+  }
 
   useEffect(() => {
-    // Deep link /editor?problem=<id>: apply the initial selection on mount.
-    // The set-state-in-effect ban is a false positive here (one-time initial
-    // state derived from the URL, not a cascading render).
-    const id = new URLSearchParams(window.location.search).get("problem");
-    if (!id) return;
-    const index = PROBLEMS.findIndex((entry) => entry.problem.id === id);
-    if (index <= 0) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setProblemIndex(index);
-    setCode(PROBLEMS[index].problem.starterCode);
-    setResult(null);
-    setShowResults(false);
-    setError(null);
+    let cancelled = false;
+    (async () => {
+      try {
+        const all = await fetchCatalogIndex();
+        if (cancelled) return;
+        const live = all.filter((e) => e.live);
+        setEntries(live);
+        const requested = new URLSearchParams(window.location.search).get("problem");
+        const initial = requested && live.some((e) => e.id === requested) ? requested : (live[0]?.id ?? "");
+        await loadProblem(initial);
+        // Warm language labels for the tab bar (python-only problems render
+        // as a "Python" tab, matching the offline milestone's click target).
+        for (const e of live) {
+          if (e.id === initial || langs[e.id]) continue;
+          fetchCatalogProblem(e.id)
+            .then((p) =>
+              setLangs((m) => ({ ...m, [e.id]: inferLanguages(p) })),
+            )
+            .catch(() => {});
+        }
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : String(err));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const selectProblem = (index: number) => {
-    setProblemIndex(index);
-    setCode(PROBLEMS[index].problem.starterCode);
+  async function selectProblem(id: string) {
+    setProblem(null);
+    setError(null);
+    try {
+      await loadProblem(id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  }
+
+  function switchLanguage(lang: CatalogLanguage) {
+    if (!problem || lang === language) return;
+    setLanguage(lang);
+    setCode(starterFor(problem, lang));
     setResult(null);
     setShowResults(false);
     setError(null);
-  };
+  }
 
-  const handleRun = async () => {
+  async function handleRun() {
+    if (!problem) return;
     setIsRunning(true);
     setShowResults(false);
     setError(null);
     try {
+      const testCases = toJudgeTestCases(problem);
       const data =
         language === "python"
-          ? await judgePython(code, problem.testCases, { timeoutMs: 2000 })
-          : await judgeJavascript(code, problem.testCases, { timeoutMs: 2000 });
+          ? await judgePython(code, testCases, { timeoutMs: 2000 })
+          : await judgeJavascript(code, testCases, { timeoutMs: 2000 });
       setResult(data);
       setShowResults(true);
     } catch (err) {
@@ -77,33 +124,72 @@ export default function EditorPage() {
     } finally {
       setIsRunning(false);
     }
-  };
+  }
+
+  if (error && !problem) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-6 text-sm text-red-400">
+          Judge error: {error}
+        </div>
+      </div>
+    );
+  }
+
+  if (!entries || !problem) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center justify-center py-16 text-gray-500">
+          <Loader2 className="w-5 h-5 animate-spin mr-2" /> Loading problem…
+        </div>
+      </div>
+    );
+  }
+
+  const langsForSelected = langs[problem.id] ?? [language];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 fade-in">
-      <div className="flex flex-wrap items-center gap-3 mb-6">
-        <span
-          className={`px-2 py-0.5 rounded text-xs font-semibold ${
-            problem.difficulty === "Easy"
-              ? "bg-green-500/10 text-green-400"
-              : "bg-yellow-500/10 text-yellow-400"
-          }`}
-        >
-          {problem.difficulty}
-        </span>
-        <h1 className="text-3xl font-bold">{problem.title}</h1>
-        <div className="ml-auto flex items-center gap-1 rounded-lg border border-white/10 p-1 overflow-x-auto whitespace-nowrap">
-          {PROBLEMS.map((entry, index) => (
+      <div className="flex flex-col gap-3 mb-6">
+        <div className="flex flex-wrap items-center gap-3">
+          {problem && (
+            <span
+              className={`px-2 py-0.5 rounded text-xs font-semibold ${diffBadge[problem.difficulty]}`}
+            >
+              {DIFFICULTY_LABEL[problem.difficulty]}
+            </span>
+          )}
+          <h1 className="text-3xl font-bold">{problem.title}</h1>
+          {langsForSelected.length > 1 && (
+            <div className="flex items-center gap-1 rounded-lg border border-white/10 p-1">
+              {(["javascript", "python"] as const).map((lang) => (
+                <button
+                  key={lang}
+                  onClick={() => switchLanguage(lang)}
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+                    lang === language
+                      ? "bg-cyan-500/20 text-cyan-300"
+                      : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  {lang === "python" ? "Python" : "JavaScript"}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="flex items-center gap-1 rounded-lg border border-white/10 p-1 overflow-x-auto whitespace-nowrap">
+          {entries.map((entry) => (
             <button
-              key={entry.problem.id}
-              onClick={() => selectProblem(index)}
+              key={entry.id}
+              onClick={() => (entry.id === problem.id ? undefined : selectProblem(entry.id))}
               className={`px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap flex-shrink-0 transition-colors ${
-                index === problemIndex
+                entry.id === problem.id
                   ? "bg-orange-500 text-white"
                   : "text-gray-400 hover:text-white"
               }`}
             >
-              {entry.language === "python" ? "Python" : entry.problem.title}
+              {tabLabel(entry.id, entry.title, langs[entry.id])}
             </button>
           ))}
         </div>
@@ -117,15 +203,27 @@ export default function EditorPage() {
           >
             <h3 className="font-semibold mb-2 text-lg">Problem Description</h3>
             <p
+              className="text-sm leading-relaxed whitespace-pre-line"
+              style={{ color: "var(--fg)", opacity: 0.7 }}
+            >
+              {problem.statement_md}
+            </p>
+          </div>
+          <div
+            className="border rounded-xl p-5"
+            style={{ background: "var(--card)", borderColor: "var(--border)" }}
+          >
+            <h3 className="font-semibold mb-2">Concepts</h3>
+            <p
               className="text-sm leading-relaxed"
               style={{ color: "var(--fg)", opacity: 0.6 }}
             >
-              {problem.description}
+              {problem.concept_md}
             </p>
           </div>
           <CodeEditor
-            key={problem.id}
-            initialCode={problem.starterCode}
+            key={`${problem.id}-${language}`}
+            initialCode={code}
             language={language}
             onCodeChange={setCode}
             onRun={handleRun}
@@ -174,6 +272,7 @@ export default function EditorPage() {
                   memory={result.memory}
                   testCases={result.testCases}
                   isLoading={isRunning}
+                  hints={problem.hints}
                 />
               )
             ))}

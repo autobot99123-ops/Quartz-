@@ -11,7 +11,10 @@ physical-phone install/offline checklist to gate Step 4.
 - **Module workers only** (Playwright Chromium rejects classic dedicated workers):
   Pyodide = real file `new Worker("/pyodide-worker.js", { type: "module" })`
   importing `/pyodide/pyodide.mjs`; JS judge = module blob worker.
-- Cache version `qz-20260923` (86 precache entries). SW registered by `sw-register.tsx`.
+- **Cache version** is now a content hash (`qz-<sha1>` of every precached payload) — any publish
+  (catalog change) yields a new cache name so installed devices update on reconnect. Live catalog
+  problems + `index.json` are precached; not-live problem files cache on first fetch. SW registered
+  by `sw-register.tsx`.
 - Fixes baked: bridged `browserWorkerFactory` onMsg/onErr, worker echoes `__runId`
   (+ route single-flight fallback), raw serialize glue (no JSON.stringify), `waitReady()`
   spawn+await before test loop, SW navigation candidate order
@@ -33,13 +36,14 @@ physical-phone install/offline checklist to gate Step 4.
   `ignoreHTTPSErrors`; expects/validates SW activated + caches + offline submit 100%.
 - One expected console line on offline flip: favicon fetch
   `net::ERR_INTERNET_DISCONNECTED` — Chromium artifact of toggling offline, harmless.
-- Gates baseline: lint 0 errors / 3 warnings (AIAdviser pre-existing), tsc clean,
-  vitest 18/18, build green, `qz-20260923`, 0 CDN hits.
+- Gates baseline: lint 0 errors / 0 warnings, tsc clean, vitest 18/18, build green (with the
+  catalog pipeline), 0 CDN hits. `src/lib/types.ts` (incl. dead `AIHint`) deleted; screenshot.js
+  ai-tutor entry removed.
 
 ## Work State
 ### Completed
 - Local HTTPS-origin milestone passes in **both** modes:
-  (a) `ignoreHTTPSErrors` on: SW activated | caches qz-20260923 | offline 4/4 (100%)
+  (a) `ignoreHTTPSErrors` on: SW activated | caches qz-… | offline 4/4 (100%)
   in 2910ms | active workers 1 | 0 CDN;
   (b) **pure OS-trust, no bypass** (phone-equivalent): SW activated | 4/4 in 2366ms |
   0 CDN. Both: offline reload serves editor shell, no app errors.

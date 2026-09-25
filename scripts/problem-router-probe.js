@@ -45,19 +45,42 @@ const EXPECTED = [
 
   let fails = 0;
 
+  // Install path first: wait for SW to control the page, so subsequent
+  // /editor.html deep links resolve from cache exactly like an installed app.
   await page.goto(`${BASE}/problems.html`, { waitUntil: "networkidle" });
+  await page.waitForFunction(
+    async () => {
+      const reg = await navigator.serviceWorker.getRegistration();
+      return !!(reg && reg.active && navigator.serviceWorker.controller);
+    },
+    { timeout: 60000 },
+  );
+
   const links = await page.$$eval("a", (as) => as.map((a) => a.getAttribute("href")));
-  const cardLinks = links.filter((h) => h && h.includes("/editor?problem="));
-  const expectedLinks = EXPECTED.map(([slug]) => `/editor?problem=${slug}`);
-  const okLinks = expectedLinks.every((l) => cardLinks.includes(l));
+  const cardLinks = links.filter((h) => h && h.includes("/editor"));
+  const okLinks = EXPECTED.every(([slug]) =>
+    cardLinks.some((l) => l.includes(slug)),
+  );
   console.log(`cards link to editor?`, okLinks);
   if (!okLinks) { fails++; console.log("  got:", JSON.stringify(cardLinks, null, 2)); }
 
   for (const [slug, title] of EXPECTED) {
-    await page.goto(`${BASE}/editor?problem=${slug}`, { waitUntil: "networkidle" });
+    await page.goto(`${BASE}/editor.html?problem=${slug}`, { waitUntil: "networkidle" });
+    // The editor now resolves its problem from the catalog asynchronously —
+    // wait for the rendered header rather than sampling before hydration.
+    await page
+      .waitForFunction(
+        (expected) => {
+          const h1 = document.querySelector("h1");
+          return !!h1 && h1.textContent.trim() === expected;
+        },
+        title,
+        { timeout: 20000 },
+      )
+      .catch(() => {});
     const h1 = await page.$eval("h1", (el) => el.textContent || "");
     const match = h1.trim() === title;
-    console.log(`/editor?problem=${slug} -> h1=${h1.trim()}`, match ? "OK" : "MISMATCH");
+    console.log(`/editor.html?problem=${slug} -> h1=${h1.trim()}`, match ? "OK" : "MISMATCH");
     if (!match) fails++;
   }
 
