@@ -1,4 +1,4 @@
-import { Shield, Upload, Database, Settings, UserPlus, List } from "lucide-react";
+import { Shield, Upload, Database, List } from "lucide-react";
 
 export default function AdminPage() {
   return (
@@ -12,8 +12,6 @@ export default function AdminPage() {
         {[
           { icon: Upload, title: "Upload Problems", desc: "Add new problems via JSON/CSV. Define statements, starter code, test cases, and limits." },
           { icon: Database, title: "Test Cases", desc: "Manage test case databases. Ensure reference solutions pass all tests before publishing." },
-          { icon: UserPlus, title: "Manage Users", desc: "View registered users, toggle roles, and manage access levels." },
-          { icon: Settings, title: "Judge Config", desc: "Configure Judge0, Redis queues, time/memory limits, and language runtimes." },
         ].map((item, i) => {
           const Icon = item.icon;
           return (

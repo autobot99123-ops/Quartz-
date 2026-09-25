@@ -1,5 +1,5 @@
 import { ProblemCard } from "@/components/ProblemCard";
-import { Search, Filter, Zap } from "lucide-react";
+import { Search, Zap } from "lucide-react";
 
 const problems = [
   { id: "1", title: "Two Sum", difficulty: "Easy" as const, acceptance: "52%", category: "Arrays", description: "Given an array of integers, return indices of the two numbers that add up to a specific target." },

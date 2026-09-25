@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Code2, FlaskConical, Brain, Rocket, ArrowRight } from "lucide-react";
+import { Code2, FlaskConical, Brain, ArrowRight } from "lucide-react";
 
 export default function Home() {
   const features = [

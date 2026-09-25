@@ -10,9 +10,23 @@ interface HintLevel {
 }
 
 const hintLevels: HintLevel[] = [
-  { level: "nudge", icon: Lightbulb, title: "💡 Nudge" },
-  { level: "concept", icon: BookOpen, title: "📖 Concept" },
-  { level: "pseudo-code", icon: FileCode, title: "📝 Pseudo-Code" },
+  { level: "nudge", icon: Lightbulb, title: "\ud83d\udca1 Nudge" },
+  { level: "concept", icon: BookOpen, title: "\ud83d\udcd6 Concept" },
+  { level: "pseudo-code", icon: FileCode, title: "\ud83d\udcdd Pseudo-Code" },
+];
+
+const mockHints: Record<string, string[]> = {
+  "Two Sum": [
+    "Think about what data structure lets you look up values in O(1) time.",
+    "A hash map can store numbers you've seen and their indices. For each number, check if the complement (target - num) exists in the map.",
+    "1. Create empty map\n2. For each num at index i:\n   a. complement = target - num\n   b. If complement in map, return [map[complement], i]\n   c. Else map[num] = i\n3. Return []",
+  ],
+};
+
+const defaultHints = [
+  "Look at the test cases and think about what patterns emerge.",
+    "Consider the time complexity of your current approach. Can you do better than O(n\u00b2)?",
+    "1. Think about what the problem is asking\n2. Consider edge cases\n3. Build a solution step by step",
 ];
 
 export function AIAdviser({ problem, userCode, failingTest, error }: {
@@ -25,34 +39,26 @@ export function AIAdviser({ problem, userCode, failingTest, error }: {
   const [level, setLevel] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  const hints = mockHints[problem] || defaultHints;
+
   const getHint = async () => {
     setLoading(true);
-    try {
-      const res = await fetch("/api/ai-adviser", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ problem, userCode, failingTest, error, level }),
-      });
-      const data = await res.json();
-      setHint(data.hint);
-      setLevel((l) => Math.min(l + 1, 2));
-    } catch (e) {
-      setHint("Unable to fetch hint. Try again later.");
-    } finally {
-      setLoading(false);
-    }
+    await new Promise((r) => setTimeout(r, 400));
+    setHint(hints[level] || hints[hints.length - 1]);
+    setLevel((l) => Math.min(l + 1, 2));
+    setLoading(false);
   };
 
   return (
-    <div className="bg-white/[0.03] border border-orange-500/10 rounded-xl overflow-hidden">
-      <div className="flex items-center gap-2 px-5 py-3 bg-orange-500/5 border-b border-orange-500/10">
-        <Brain className="w-5 h-5 text-orange-400" />
-        <h3 className="font-semibold text-orange-400">AI Tutor</h3>
+    <div className="border rounded-xl overflow-hidden" style={{ background: "var(--card)", borderColor: "color-mix(in srgb, var(--accent) 10%, transparent)" }}>
+      <div className="flex items-center gap-2 px-5 py-3 border-b" style={{ background: "color-mix(in srgb, var(--accent) 5%, transparent)", borderColor: "color-mix(in srgb, var(--accent) 10%, transparent)" }}>
+        <Brain className="w-5 h-5" style={{ color: "var(--accent)" }} />
+        <h3 className="font-semibold" style={{ color: "var(--accent)" }}>AI Tutor</h3>
       </div>
 
       <div className="p-5">
-        <p className="text-sm text-gray-400 mb-4">
-          Stuck on: <span className="text-orange-300 font-medium">{problem}</span>
+        <p className="text-sm mb-4" style={{ color: "var(--fg)", opacity: 0.6 }}>
+          Stuck on: <span className="font-medium" style={{ color: "var(--accent)" }}>{problem}</span>
         </p>
 
         <div className="space-y-2 mb-4">
@@ -66,13 +72,17 @@ export function AIAdviser({ problem, userCode, failingTest, error }: {
                 disabled={!isActive || loading}
                 className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all ${
                   isActive
-                    ? "bg-orange-500/5 border border-orange-500/20 hover:bg-orange-500/10 cursor-pointer"
-                    : "bg-white/[0.02] border border-white/5 opacity-50 cursor-not-allowed"
+                    ? "border hover:opacity-80 cursor-pointer"
+                    : "border opacity-50 cursor-not-allowed"
                 }`}
+                style={{
+                  background: isActive ? "color-mix(in srgb, var(--accent) 5%, transparent)" : "var(--card)",
+                  borderColor: isActive ? "color-mix(in srgb, var(--accent) 20%, transparent)" : "var(--border)",
+                }}
               >
-                <Icon className="w-4 h-4 text-orange-400 flex-shrink-0" />
+                <Icon className="w-4 h-4 flex-shrink-0" style={{ color: "var(--accent)" }} />
                 <span className="text-sm font-medium">{h.title}</span>
-                {loading && i === level && <Loader2 className="w-4 h-4 animate-spin ml-auto text-orange-400" />}
+                {loading && i === level && <Loader2 className="w-4 h-4 animate-spin ml-auto" style={{ color: "var(--accent)" }} />}
               </button>
             );
           })}
@@ -90,7 +100,7 @@ export function AIAdviser({ problem, userCode, failingTest, error }: {
           <div className="mt-4 p-4 bg-green-500/5 border border-green-500/20 rounded-lg fade-in">
             <div className="flex items-start gap-2">
               <ChevronDown className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-green-300 leading-relaxed">{hint}</p>
+              <p className="text-sm text-green-300 leading-relaxed whitespace-pre-wrap">{hint}</p>
             </div>
           </div>
         )}

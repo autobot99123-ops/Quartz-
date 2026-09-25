@@ -3,7 +3,7 @@ import { Code2 } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f] px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "var(--bg)" }}>
       <div className="text-center fade-in">
         <Code2 className="w-16 h-16 text-orange-500/30 mx-auto mb-4" />
         <h1 className="text-6xl font-bold gradient-text mb-2">404</h1>

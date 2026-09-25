@@ -1,10 +1,6 @@
-interface TestCase {
-  id: number;
-  input: string;
-  expected: string;
-  output: string;
-  status: "Accepted" | "Wrong Answer" | "Time Limit Exceeded" | "Runtime Error" | "Compile Error";
-}
+import type { JudgeTestResult } from "@/lib/judge/types";
+
+type TestCase = JudgeTestResult;
 
 interface ResultPanelProps {
   passed: number;

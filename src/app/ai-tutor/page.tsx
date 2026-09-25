@@ -1,4 +1,5 @@
-import { Brain, BookOpen, FileCode, MessageSquare } from "lucide-react";
+import { Brain, BookOpen, FileCode } from "lucide-react";
+import { Lightbulb } from "lucide-react";
 import { AIAdviser } from "@/components/AIAdviser";
 
 export default function AITutorPage() {
@@ -71,6 +72,3 @@ export default function AITutorPage() {
   );
 }
 
-function Lightbulb({ className }: { className: string }) {
-  return <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>;
-}

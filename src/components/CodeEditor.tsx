@@ -1,8 +1,19 @@
 "use client";
 
-import { useRef, useCallback } from "react";
-import Editor, { OnMount, OnChange } from "@monaco-editor/react";
-import { Settings2, Play } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { Compartment, EditorState } from "@codemirror/state";
+import {
+  EditorView,
+  highlightActiveLine,
+  lineNumbers,
+} from "@codemirror/view";
+import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import { keymap } from "@codemirror/view";
+import { javascript } from "@codemirror/lang-javascript";
+import { python } from "@codemirror/lang-python";
+import { oneDark } from "@codemirror/theme-one-dark";
+import { Play } from "lucide-react";
+import { TWO_SUM_STARTER_CODE } from "@/lib/judge/problems";
 
 interface CodeEditorProps {
   initialCode?: string;
@@ -12,52 +23,100 @@ interface CodeEditorProps {
   readOnly?: boolean;
 }
 
-const defaultCode = `// Welcome to Quartz Judge!
-// Write your solution below and hit Run.
-
-function solution(nums: number[], target: number): number[] {
-    // Your code here
-    for (let i = 0; i < nums.length; i++) {
-        for (let j = i + 1; j < nums.length; j++) {
-            if (nums[i] + nums[j] === target) {
-                return [i, j];
-            }
-        }
-    }
-    return [];
-}
-
-// Test it:
-console.log(solution([2, 7, 11, 15], 9)); // Expected: [0, 1]
-`;
-
 export function CodeEditor({
-  initialCode = defaultCode,
-  language = "typescript",
+  initialCode = TWO_SUM_STARTER_CODE,
+  language = "javascript",
   onCodeChange,
   onRun,
   readOnly = false,
 }: CodeEditorProps) {
-  const editorRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const viewRef = useRef<EditorView | null>(null);
+  const editableCompartment = useRef(new Compartment());
+  const onCodeChangeRef = useRef(onCodeChange);
 
-  const handleMount: OnMount = (editor, monaco) => {
-    editorRef.current = editor;
-  };
+  useEffect(() => {
+    onCodeChangeRef.current = onCodeChange;
+  }, [onCodeChange]);
 
-  const handleChange: OnChange = (value) => {
-    onCodeChange?.(value || "");
-  };
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const state = EditorState.create({
+      doc: initialCode,
+      extensions: [
+        lineNumbers(),
+        highlightActiveLine(),
+        history(),
+        keymap.of([...defaultKeymap, ...historyKeymap]),
+        language === "python" ? python() : javascript(),
+        oneDark,
+        EditorView.lineWrapping,
+        EditorView.theme({
+          "&": { height: "100%", fontSize: "14px" },
+          ".cm-scroller": { overflow: "auto" },
+          ".cm-content": { fontFamily: "'Fira Code', 'Cascadia Code', monospace" },
+        }),
+        editableCompartment.current.of(EditorView.editable.of(!readOnly)),
+        EditorView.updateListener.of((update) => {
+          if (update.docChanged) {
+            onCodeChangeRef.current?.(update.state.doc.toString());
+          }
+        }),
+      ],
+    });
+
+    const view = new EditorView({ state, parent: container });
+    viewRef.current = view;
+    onCodeChangeRef.current?.(initialCode);
+
+    return () => {
+      view.destroy();
+      viewRef.current = null;
+    };
+    // Mount once — code/readOnly sync via effects below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
+    view.dispatch({
+      effects: editableCompartment.current.reconfigure(
+        EditorView.editable.of(!readOnly),
+      ),
+    });
+  }, [readOnly]);
+
+  const fileName =
+    language === "typescript"
+      ? "solution.ts"
+      : language === "python"
+        ? "solution.py"
+        : "solution.js";
 
   return (
-    <div className="monaco-container h-[500px] md:h-[600px] bg-[#1e1e2e] rounded-xl overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-2 bg-[#181825] border-b border-white/5">
+    <div
+      className="codemirror-container h-[500px] md:h-[600px] rounded-xl overflow-hidden"
+      style={{ background: "#1e1e2e" }}
+    >
+      <div
+        className="flex items-center justify-between px-4 py-2 border-b"
+        style={{ background: "#181825", borderColor: "var(--border)" }}
+      >
         <div className="flex items-center gap-2">
           <div className="flex gap-1.5">
             <div className="w-3 h-3 rounded-full bg-red-500"></div>
             <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
             <div className="w-3 h-3 rounded-full bg-green-500"></div>
           </div>
-          <span className="text-xs text-gray-400 ml-2">solution.ts</span>
+          <span
+            className="text-xs ml-2"
+            style={{ color: "var(--fg)", opacity: 0.4 }}
+          >
+            {fileName}
+          </span>
         </div>
         <button
           onClick={onRun}
@@ -67,27 +126,7 @@ export function CodeEditor({
           <Play className="w-4 h-4" /> Run
         </button>
       </div>
-      <Editor
-        height="calc(100% - 42px)"
-        language={language}
-        value={initialCode}
-        onChange={handleChange}
-        onMount={handleMount}
-        theme="vs-dark"
-        readOnly={readOnly}
-        options={{
-          minimap: { enabled: false },
-          fontSize: 14,
-          fontFamily: "'Fira Code', 'Cascadia Code', monospace",
-          lineNumbers: "on",
-          padding: { top: 16 },
-          scrollBeyondLastLine: false,
-          automaticLayout: true,
-          tabSize: 2,
-          formatOnPaste: true,
-          suggestOnTriggerCharacters: true,
-        }}
-      />
+      <div ref={containerRef} className="h-[calc(100%-42px)] text-left" />
     </div>
   );
 }

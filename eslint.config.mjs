@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored third-party assets (Pyodide) are not our code:
+    "public/pyodide/**",
   ]),
 ]);
 
