@@ -2,12 +2,12 @@ import { ProblemCard } from "@/components/ProblemCard";
 import { Search, Zap } from "lucide-react";
 
 const problems = [
-  { id: "1", title: "Two Sum", difficulty: "Easy" as const, acceptance: "52%", category: "Arrays", description: "Given an array of integers, return indices of the two numbers that add up to a specific target." },
-  { id: "2", title: "Valid Parentheses", difficulty: "Easy" as const, acceptance: "48%", category: "Stacks", description: "Given a string containing just the characters (), {}, and [], determine if the input string is valid." },
-  { id: "3", title: "Merge Intervals", difficulty: "Medium" as const, acceptance: "38%", category: "Sorting", description: "Given an array of intervals, merge all overlapping intervals and return an array of the non-overlapping intervals." },
-  { id: "4", title: "Longest Increasing Subsequence", difficulty: "Medium" as const, acceptance: "32%", category: "DP", description: "Given an integer array, find the length of the longest strictly increasing subsequence." },
-  { id: "5", title: "Word Ladder", difficulty: "Hard" as const, acceptance: "28%", category: "BFS", description: "A transformation sequence from beginWord to endWord uses words from a given dictionary." },
-  { id: "6", title: "Median of Two Sorted Arrays", difficulty: "Hard" as const, acceptance: "25%", category: "Binary Search", description: "Given two sorted arrays, return the median of the two sorted arrays." },
+  { id: "two-sum", title: "Two Sum", difficulty: "Easy" as const, acceptance: "52%", category: "Arrays", description: "Given an array of integers, return indices of the two numbers that add up to a specific target." },
+  { id: "valid-parentheses", title: "Valid Parentheses", difficulty: "Easy" as const, acceptance: "48%", category: "Stacks", description: "Given a string containing just the characters (), {}, and [], determine if the input string is valid." },
+  { id: "merge-intervals", title: "Merge Intervals", difficulty: "Medium" as const, acceptance: "38%", category: "Sorting", description: "Given an array of intervals, merge all overlapping intervals and return an array of the non-overlapping intervals." },
+  { id: "longest-increasing-subsequence", title: "Longest Increasing Subsequence", difficulty: "Medium" as const, acceptance: "32%", category: "DP", description: "Given an integer array, find the length of the longest strictly increasing subsequence." },
+  { id: "word-ladder", title: "Word Ladder", difficulty: "Hard" as const, acceptance: "28%", category: "BFS", description: "A transformation sequence from beginWord to endWord uses words from a given dictionary." },
+  { id: "median-of-two-sorted-arrays", title: "Median of Two Sorted Arrays", difficulty: "Hard" as const, acceptance: "25%", category: "Binary Search", description: "Given two sorted arrays, return the median of the two sorted arrays." },
 ];
 
 const categories = ["All", "Arrays", "Stacks", "Sorting", "DP", "BFS", "Binary Search", "Graphs"];

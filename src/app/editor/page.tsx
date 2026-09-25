@@ -1,17 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CodeEditor } from "@/components/CodeEditor";
 import { ResultPanel } from "@/components/ResultPanel";
 import { AIAdviser } from "@/components/AIAdviser";
 import { Play, Loader2 } from "lucide-react";
 import { judgeJavascript, judgePython } from "@/lib/judge/engine";
-import { TWO_SUM_PROBLEM, PYTHON_MAX_PROBLEM } from "@/lib/judge/problems";
+import {
+  TWO_SUM_PROBLEM,
+  VALID_PARENTHESES_PROBLEM,
+  MERGE_INTERVALS_PROBLEM,
+  LIS_PROBLEM,
+  WORD_LADDER_PROBLEM,
+  MEDIAN_PROBLEM,
+  PYTHON_MAX_PROBLEM,
+} from "@/lib/judge/problems";
 import type { HardcodedProblem } from "@/lib/judge/problems";
 import type { JudgeResult } from "@/lib/judge/types";
 
 const PROBLEMS: { problem: HardcodedProblem; language: "javascript" | "python" }[] = [
   { problem: TWO_SUM_PROBLEM, language: "javascript" },
+  { problem: VALID_PARENTHESES_PROBLEM, language: "javascript" },
+  { problem: MERGE_INTERVALS_PROBLEM, language: "javascript" },
+  { problem: LIS_PROBLEM, language: "javascript" },
+  { problem: WORD_LADDER_PROBLEM, language: "javascript" },
+  { problem: MEDIAN_PROBLEM, language: "javascript" },
   { problem: PYTHON_MAX_PROBLEM, language: "python" },
 ];
 
@@ -23,6 +36,22 @@ export default function EditorPage() {
   const [result, setResult] = useState<JudgeResult | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Deep link /editor?problem=<id>: apply the initial selection on mount.
+    // The set-state-in-effect ban is a false positive here (one-time initial
+    // state derived from the URL, not a cascading render).
+    const id = new URLSearchParams(window.location.search).get("problem");
+    if (!id) return;
+    const index = PROBLEMS.findIndex((entry) => entry.problem.id === id);
+    if (index <= 0) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setProblemIndex(index);
+    setCode(PROBLEMS[index].problem.starterCode);
+    setResult(null);
+    setShowResults(false);
+    setError(null);
+  }, []);
 
   const selectProblem = (index: number) => {
     setProblemIndex(index);
@@ -64,18 +93,18 @@ export default function EditorPage() {
           {problem.difficulty}
         </span>
         <h1 className="text-3xl font-bold">{problem.title}</h1>
-        <div className="ml-auto flex items-center gap-1 rounded-lg border border-white/10 p-1">
+        <div className="ml-auto flex items-center gap-1 rounded-lg border border-white/10 p-1 overflow-x-auto whitespace-nowrap">
           {PROBLEMS.map((entry, index) => (
             <button
               key={entry.problem.id}
               onClick={() => selectProblem(index)}
-              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap flex-shrink-0 transition-colors ${
                 index === problemIndex
                   ? "bg-orange-500 text-white"
                   : "text-gray-400 hover:text-white"
               }`}
             >
-              {entry.language === "python" ? "Python" : "JavaScript"}
+              {entry.language === "python" ? "Python" : entry.problem.title}
             </button>
           ))}
         </div>
