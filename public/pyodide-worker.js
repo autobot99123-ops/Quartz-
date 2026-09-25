@@ -37,14 +37,24 @@ self.onmessage = function (e) {
   var data = e.data || {};
   if (data.type !== "run") return;
   var runId = data.__runId;
+  var outLines = [];
   function respond(result) {
     result.__runId = runId;
+    result.stdout = outLines.join("\n");
     self.postMessage(result);
   }
   readyPromise.then(
     function () {
       var scope;
       try {
+        // Capture whatever the user's code prints (stdout + stderr) into
+        // outLines so the Run console can show it alongside the result.
+        try {
+          runtime.setStdout({ batched: function (s) { outLines.push(String(s)); } });
+          runtime.setStderr({ batched: function (s) { outLines.push(String(s)); } });
+        } catch (ignoreCapture) {
+          // setStdout/setStderr are optional — capture is best-effort.
+        }
         scope = runtime.toPy({});
         try {
           runtime.runPython(data.code, { globals: scope });

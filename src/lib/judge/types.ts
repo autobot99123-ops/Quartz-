@@ -24,6 +24,8 @@ export interface JudgeTestResult {
   output: string;
   status: Verdict;
   timeMs: number;
+  /** Captured stdout/stderr from the user's code ('' when silent). */
+  stdout?: string;
 }
 
 export interface JudgeResult {

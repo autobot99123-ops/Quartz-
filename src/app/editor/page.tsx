@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CodeEditor } from "@/components/CodeEditor";
+import { CodeEditor, type RunOutput } from "@/components/CodeEditor";
 import { ResultPanel } from "@/components/ResultPanel";
 import { Play, Loader2 } from "lucide-react";
-import { judgeJavascript, judgePython } from "@/lib/judge/engine";
-import type { JudgeResult } from "@/lib/judge/types";
+import { judgeJavascript, judgePython, runSingle } from "@/lib/judge/engine";
+import type { JudgeResult, JudgeTestResult } from "@/lib/judge/types";
 import {
   DIFFICULTY_LABEL,
   fetchCatalogIndex,
@@ -38,6 +38,7 @@ export default function EditorPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [result, setResult] = useState<JudgeResult | null>(null);
   const [showResults, setShowResults] = useState(false);
+  const [runOutput, setRunOutput] = useState<RunOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
   const loadToken = useRef(0);
 
@@ -52,6 +53,7 @@ export default function EditorPage() {
     setCode(starterFor(p, available[0]));
     setResult(null);
     setShowResults(false);
+    setRunOutput(null);
     setError(null);
   }
 
@@ -102,10 +104,56 @@ export default function EditorPage() {
     setCode(starterFor(problem, lang));
     setResult(null);
     setShowResults(false);
+    setRunOutput(null);
     setError(null);
   }
 
+  function formatRunText(lang: string, sample: JudgeTestResult): RunOutput {
+    const lines: string[] = [];
+    lines.push(`$ ${lang} ${sample.input}`);
+    if (sample.stdout && sample.stdout.trim()) {
+      lines.push(sample.stdout.replace(/\s+$/, ""));
+    }
+    const isError =
+      sample.status === "Compile Error" ||
+      sample.status === "Runtime Error" ||
+      sample.status === "Time Limit Exceeded";
+    if (sample.status === "Accepted") {
+      lines.push("result = " + sample.output);
+    } else if (sample.status === "Wrong Answer") {
+      lines.push("result = " + sample.output);
+      lines.push("expected: " + sample.expected);
+    } else if (sample.status === "Compile Error") {
+      lines.push("compile error: " + sample.output);
+    } else if (sample.status === "Time Limit Exceeded") {
+      lines.push("time limit exceeded: " + sample.output);
+    } else {
+      lines.push("runtime error: " + sample.output);
+    }
+    return { text: lines.join("\n"), isError };
+  }
+
   async function handleRun() {
+    if (!problem) return;
+    setIsRunning(true);
+    setShowResults(false);
+    setError(null);
+    try {
+      const sample = toJudgeTestCases(problem)[0];
+      const lang = language === "python" ? "python" : "js";
+      const r = await runSingle(language, code, sample, { timeoutMs: 2000 });
+      setRunOutput(formatRunText(lang, r));
+    } catch (err) {
+      setRunOutput({
+        text: "run error: " + (err instanceof Error ? err.message : String(err)),
+        isError: true,
+      });
+    } finally {
+      setIsRunning(false);
+    }
+  }
+
+  async function handleSubmit() {
     if (!problem) return;
     setIsRunning(true);
     setShowResults(false);
@@ -227,9 +275,11 @@ export default function EditorPage() {
             language={language}
             onCodeChange={setCode}
             onRun={handleRun}
+            isRunning={isRunning}
+            output={runOutput}
           />
           <button
-            onClick={handleRun}
+            onClick={handleSubmit}
             disabled={isRunning}
             className="w-full py-3 rounded-lg bg-gradient-to-r from-orange-500 to-cyan-500 text-white font-bold text-lg hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 transition-opacity"
           >

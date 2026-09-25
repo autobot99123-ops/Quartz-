@@ -91,3 +91,23 @@ export async function judgePython(
     testCases: results,
   };
 }
+
+/** Run ONE case for the inline Run console. Captures stdout from the
+ *  user's code so the editor can print it like an IDE Run button. */
+export async function runSingle(
+  language: "javascript" | "python",
+  code: string,
+  testCase: JudgeTestCase,
+  options: JudgeOptions = {},
+): Promise<JudgeTestResult> {
+  const timeoutMs = options.timeoutMs ?? 2000;
+  if (language === "python") {
+    const runner = options.runner ?? defaultPythonRunner;
+    if (!options.runner) {
+      await getPyodideRunner().waitReady();
+    }
+    return runner(code, testCase, timeoutMs);
+  }
+  const runner = options.runner ?? runSingleTestWithWorker;
+  return runner(code, testCase, timeoutMs);
+}

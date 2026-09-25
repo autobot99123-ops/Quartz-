@@ -139,7 +139,8 @@ export function createPyodideRunner(factory: WorkerFactory = browserWorkerFactor
     code: string,
     args: unknown[],
   ): Promise<
-    { ok: true; value: unknown } | { ok: false; errorType: string; error?: string }
+    | { ok: true; value: unknown; stdout?: string }
+    | { ok: false; errorType: string; error?: string; stdout?: string }
   > => {
     return new Promise((resolve, reject) => {
       ensureWorker().then((w) => {
@@ -150,13 +151,15 @@ export function createPyodideRunner(factory: WorkerFactory = browserWorkerFactor
             value?: unknown;
             errorType?: string;
             error?: string;
+            stdout?: string;
           };
-          if (data.ok) resolve({ ok: true, value: data.value });
+          if (data.ok) resolve({ ok: true, value: data.value, stdout: data.stdout });
           else
             resolve({
               ok: false,
               errorType: data.errorType ?? "runtime",
               error: data.error,
+              stdout: data.stdout,
             });
         });
         w.postMessage({ __runId: id, type: "run", code, args });
@@ -227,6 +230,7 @@ export function runPythonTestWithWorker(
           testCase,
           started,
         );
+        mapped.stdout = response.stdout;
         resolve(mapped);
       })
       .catch((err) => {

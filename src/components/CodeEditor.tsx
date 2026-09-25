@@ -12,8 +12,13 @@ import { keymap } from "@codemirror/view";
 import { javascript } from "@codemirror/lang-javascript";
 import { python } from "@codemirror/lang-python";
 import { oneDark } from "@codemirror/theme-one-dark";
-import { Play } from "lucide-react";
+import { Loader2, Play } from "lucide-react";
 import { TWO_SUM_STARTER_CODE } from "@/lib/judge/problems";
+
+export interface RunOutput {
+  text: string;
+  isError: boolean;
+}
 
 interface CodeEditorProps {
   initialCode?: string;
@@ -21,6 +26,8 @@ interface CodeEditorProps {
   onCodeChange?: (code: string) => void;
   onRun?: () => void;
   readOnly?: boolean;
+  isRunning?: boolean;
+  output?: RunOutput | null;
 }
 
 export function CodeEditor({
@@ -29,6 +36,8 @@ export function CodeEditor({
   onCodeChange,
   onRun,
   readOnly = false,
+  isRunning = false,
+  output = null,
 }: CodeEditorProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<EditorView | null>(null);
@@ -98,11 +107,11 @@ export function CodeEditor({
 
   return (
     <div
-      className="codemirror-container h-[500px] md:h-[600px] rounded-xl overflow-hidden"
+      className="codemirror-container flex flex-col h-[500px] md:h-[600px] rounded-xl overflow-hidden"
       style={{ background: "#1e1e2e" }}
     >
       <div
-        className="flex items-center justify-between px-4 py-2 border-b"
+        className="flex items-center justify-between px-4 py-2 border-b flex-shrink-0"
         style={{ background: "#181825", borderColor: "var(--border)" }}
       >
         <div className="flex items-center gap-2">
@@ -120,13 +129,44 @@ export function CodeEditor({
         </div>
         <button
           onClick={onRun}
-          disabled={readOnly}
+          disabled={readOnly || isRunning}
           className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-orange-500 text-white text-sm font-semibold hover:bg-orange-600 disabled:opacity-50 transition-colors"
         >
-          <Play className="w-4 h-4" /> Run
+          {isRunning ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Play className="w-4 h-4" />
+          )}
+          {isRunning ? "Running…" : "Run"}
         </button>
       </div>
-      <div ref={containerRef} className="h-[calc(100%-42px)] text-left" />
+      <div ref={containerRef} className="flex-1 min-h-0 text-left" />
+      {output && (
+        <div
+          className="flex-shrink-0 border-t"
+          style={{ background: "#0f0d09", borderColor: "var(--border)" }}
+        >
+          <div
+            className="flex items-center justify-between px-3 py-1.5 border-b"
+            style={{ borderColor: "var(--border)" }}
+          >
+            <span
+              className="text-[11px] font-semibold uppercase tracking-widest"
+              style={{ color: "var(--fg)", opacity: 0.5 }}
+            >
+              Output
+            </span>
+          </div>
+          <pre
+            className={`px-3 py-2 text-xs leading-relaxed whitespace-pre-wrap font-mono overflow-auto max-h-40 ${
+              output.isError ? "text-red-400" : "text-green-400"
+            }`}
+            style={{ fontFamily: "'Fira Code', 'Cascadia Code', monospace" }}
+          >
+            {output.text}
+          </pre>
+        </div>
+      )}
     </div>
   );
 }
