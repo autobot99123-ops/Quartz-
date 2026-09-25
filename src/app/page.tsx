@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Code2, FlaskConical, Brain, ArrowRight } from "lucide-react";
+import { Code2, FlaskConical, ArrowRight } from "lucide-react";
 
 export default function Home() {
   const features = [
@@ -12,11 +12,6 @@ export default function Home() {
       icon: FlaskConical,
       title: "Instant Judge",
       desc: "Submit your code and get instant verdicts — Accepted, Wrong Answer, TLE, RTE, or Compile Error.",
-    },
-    {
-      icon: Brain,
-      title: "AI Tutor",
-      desc: "Get step-by-step hints from AI when you're stuck. Nudge → Concept → Pseudo-code.",
     },
   ];
 
@@ -44,7 +39,7 @@ export default function Home() {
             <span className="gradient-text">Learn Faster.</span>
           </h1>
           <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-10">
-            A LeetCode-style competitive programming platform with AI-powered tutoring, instant code judging, and real-time feedback.
+            A LeetCode-style competitive programming platform with in-browser code judging, instant verdicts, and real-time feedback.
           </p>
           <div className="flex items-center justify-center gap-4">
             <Link href="/problems" className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-cyan-500 text-white font-bold hover:opacity-90 transition-opacity">
@@ -106,7 +101,7 @@ export default function Home() {
       <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
         <div className="bg-gradient-to-br from-orange-500/10 to-cyan-500/10 border border-orange-500/10 rounded-2xl p-12 pulse-glow">
           <h2 className="text-3xl font-bold mb-4">Ready to Level Up?</h2>
-          <p className="text-gray-400 mb-8">Join thousands of developers sharpening their skills with AI-powered guidance.</p>
+          <p className="text-gray-400 mb-8">Join developers sharpening their skills — one problem at a time.</p>
           <Link href="/problems" className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-cyan-500 text-white font-bold hover:opacity-90 transition-opacity">
             Get Started Free
           </Link>

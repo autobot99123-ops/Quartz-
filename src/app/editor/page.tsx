@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { CodeEditor } from "@/components/CodeEditor";
 import { ResultPanel } from "@/components/ResultPanel";
-import { AIAdviser } from "@/components/AIAdviser";
 import { Play, Loader2 } from "lucide-react";
 import { judgeJavascript, judgePython } from "@/lib/judge/engine";
 import {
@@ -178,12 +177,6 @@ export default function EditorPage() {
                 />
               )
             ))}
-          <AIAdviser
-            problem={problem.title}
-            userCode={code}
-            failingTest=""
-            error=""
-          />
         </div>
       </div>
     </div>

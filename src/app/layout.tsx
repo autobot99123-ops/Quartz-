@@ -12,8 +12,8 @@ const inter = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Quartz Judge — AI-Powered Coding Platform",
-  description: "Offline-first LeetCode-style judge with AI tutor. JavaScript + Python, no API keys, no backend.",
+  title: "Quartz Judge — Coding Platform",
+  description: "Offline-first LeetCode-style judge. JavaScript + Python, no API keys, no backend.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
